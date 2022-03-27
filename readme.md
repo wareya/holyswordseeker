@@ -12,6 +12,8 @@ A roguelike set in a magical tower with the goal of helping restore the world. T
 
 At first, you enter the tower as a Seeker, with the goal of recovering the Holy Sword. If you recover it, *and then leave*, you unlock Hero mode, where you enter it with the Holy Sword and a recurring boss attacks you ever X floors, and killing it is the main/obvious victory condition. Seeker mode is the game's "real" mode, and Hero mode is slightly more like a traditional roguelike in that various overpowered mechanics are disabled.
 
+![screenshot](docs/screenshot.png)
+
 ## DESIGN QUESTIONS
 
 Should the world be endless like it is in OWH? I'm going to have segregated floors, but they could maybe go on forever if you ignore the game's endgoal. Maybe the exit stairs should always be in the top center of the floor? Some people really don't like searching for the exit stairs. Maybe we should give the player a minimap and always display the exit stairs on it.
