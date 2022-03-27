@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/bookFlip2.ogg-eb3c9cca29f58e4c6c3638fe1fe6027b.oggstr"
+
+[deps]
+
+source_file="res://sfx/bookFlip2.ogg"
+dest_files=[ "res://.import/bookFlip2.ogg-eb3c9cca29f58e4c6c3638fe1fe6027b.oggstr" ]
+
+[params]
+
+loop=false
+loop_offset=0

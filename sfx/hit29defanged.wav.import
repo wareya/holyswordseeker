@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/hit29defanged.wav-8f79a7d7140c7d6fcb241d72a4a811c6.sample"
+
+[deps]
+
+source_file="res://sfx/hit29defanged.wav"
+dest_files=[ "res://.import/hit29defanged.wav-8f79a7d7140c7d6fcb241d72a4a811c6.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=true
+edit/loop=false
+compress/mode=0

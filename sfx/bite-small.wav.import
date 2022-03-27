@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/bite-small.wav-54e6c2043e2113190a8152696efbc8d1.sample"
+
+[deps]
+
+source_file="res://sfx/bite-small.wav"
+dest_files=[ "res://.import/bite-small.wav-54e6c2043e2113190a8152696efbc8d1.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=true
+edit/loop=false
+compress/mode=0

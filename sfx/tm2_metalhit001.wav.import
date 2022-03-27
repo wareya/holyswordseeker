@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/tm2_metalhit001.wav-654f004148e1c41d7c47f286d9844608.sample"
+
+[deps]
+
+source_file="res://sfx/tm2_metalhit001.wav"
+dest_files=[ "res://.import/tm2_metalhit001.wav-654f004148e1c41d7c47f286d9844608.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=true
+edit/loop=false
+compress/mode=0

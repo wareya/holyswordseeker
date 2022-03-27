@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/fwup.wav-8187cb070e2de80d26376315e431bd06.sample"
+
+[deps]
+
+source_file="res://sfx/fwup.wav"
+dest_files=[ "res://.import/fwup.wav-8187cb070e2de80d26376315e431bd06.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

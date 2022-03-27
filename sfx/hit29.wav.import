@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/hit29.wav-c8f4b0972071c72c4589d2d56d3f30c3.sample"
+
+[deps]
+
+source_file="res://sfx/hit29.wav"
+dest_files=[ "res://.import/hit29.wav-c8f4b0972071c72c4589d2d56d3f30c3.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=true
+edit/loop=false
+compress/mode=0
