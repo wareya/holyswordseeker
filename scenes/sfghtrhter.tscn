@@ -1,0 +1,166 @@
+[gd_scene format=2]
+
+[node name="ScrollContainer" type="ScrollContainer"]
+margin_right = 250.0
+margin_bottom = 147.0
+follow_focus = true
+scroll_horizontal_enabled = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+margin_right = 238.0
+margin_bottom = 399.0
+size_flags_horizontal = 3
+
+[node name="RichTextLabel" type="RichTextLabel" parent="VBoxContainer"]
+margin_right = 238.0
+margin_bottom = 15.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 19.0
+margin_right = 238.0
+margin_bottom = 34.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel3" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 38.0
+margin_right = 238.0
+margin_bottom = 53.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel4" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 57.0
+margin_right = 238.0
+margin_bottom = 72.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel5" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 76.0
+margin_right = 238.0
+margin_bottom = 91.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel6" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 95.0
+margin_right = 238.0
+margin_bottom = 110.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel7" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 114.0
+margin_right = 238.0
+margin_bottom = 129.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel8" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 133.0
+margin_right = 238.0
+margin_bottom = 148.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel9" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 152.0
+margin_right = 238.0
+margin_bottom = 167.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel10" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 171.0
+margin_right = 238.0
+margin_bottom = 186.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel11" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 190.0
+margin_right = 238.0
+margin_bottom = 205.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel12" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 209.0
+margin_right = 238.0
+margin_bottom = 224.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel13" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 228.0
+margin_right = 238.0
+margin_bottom = 243.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel14" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 247.0
+margin_right = 238.0
+margin_bottom = 262.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel15" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 266.0
+margin_right = 238.0
+margin_bottom = 281.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel16" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 285.0
+margin_right = 238.0
+margin_bottom = 300.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel17" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 304.0
+margin_right = 238.0
+margin_bottom = 319.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel18" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 323.0
+margin_right = 238.0
+margin_bottom = 338.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel19" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 342.0
+margin_right = 238.0
+margin_bottom = 357.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel20" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 361.0
+margin_right = 238.0
+margin_bottom = 376.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="RichTextLabel21" type="RichTextLabel" parent="VBoxContainer"]
+margin_top = 380.0
+margin_right = 238.0
+margin_bottom = 395.0
+text = "dsfgsdrgeregagsr"
+fit_content_height = true
+
+[node name="Control" type="Control" parent="VBoxContainer"]
+margin_top = 399.0
+margin_right = 238.0
+margin_bottom = 399.0
+__meta__ = {
+"_edit_use_anchors_": false
+}

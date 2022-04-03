@@ -1,0 +1,66 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://art/Play-Regular.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://sfx/blip.wav" type="AudioStream" id=2]
+[ext_resource path="res://art/brassarrow.png" type="Texture" id=3]
+[ext_resource path="res://art/brass9patch.png" type="Texture" id=4]
+[ext_resource path="res://scenes/ui/TextBubble.gd" type="Script" id=5]
+
+[sub_resource type="DynamicFont" id=1]
+size = 20
+outline_size = 1
+outline_color = Color( 0, 0, 0, 0.501961 )
+font_data = ExtResource( 1 )
+
+[sub_resource type="Theme" id=2]
+default_font = SubResource( 1 )
+
+[node name="TextBubble" type="Node2D" groups=["TextBubble"]]
+z_index = 1
+script = ExtResource( 5 )
+
+[node name="Rect" type="NinePatchRect" parent="."]
+margin_right = 217.0
+margin_bottom = 88.0
+texture = ExtResource( 4 )
+patch_margin_left = 4
+patch_margin_top = 4
+patch_margin_right = 4
+patch_margin_bottom = 4
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ArrowLeft" type="TextureRect" parent="Rect"]
+visible = false
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_top = -1.0
+margin_right = 16.0
+margin_bottom = 15.0
+texture = ExtResource( 3 )
+stretch_mode = 4
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Blip" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 2 )
+bus = "SFX"
+
+[node name="Label" type="RichTextLabel" parent="."]
+anchor_right = 2.0
+anchor_bottom = 2.0
+margin_left = 5.0
+margin_top = 4.0
+margin_right = 401.0
+margin_bottom = 18.0
+rect_scale = Vector2( 0.5, 0.5 )
+theme = SubResource( 2 )
+bbcode_enabled = true
+bbcode_text = "."
+text = "."
+fit_content_height = true
+__meta__ = {
+"_edit_use_anchors_": false
+}

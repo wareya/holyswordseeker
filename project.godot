@@ -9,20 +9,20 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "KinematicBody2D",
+"base": "Node2D",
 "class": "Character",
 "language": "GDScript",
-"path": "res://Character.gd"
+"path": "res://scenes/entities/Character.gd"
 }, {
 "base": "Reference",
 "class": "TextBubble",
 "language": "GDScript",
-"path": "res://_TextBubble.gd"
+"path": "res://scenes/ui/_TextBubble.gd"
 }, {
 "base": "Reference",
 "class": "TextWindow",
 "language": "GDScript",
-"path": "res://_TextWindow.gd"
+"path": "res://scenes/ui/_TextWindow.gd"
 } ]
 _global_script_class_icons={
 "Character": "",
@@ -33,7 +33,7 @@ _global_script_class_icons={
 [application]
 
 config/name="toy roguelike"
-run/main_scene="res://Test.tscn"
+run/main_scene="res://scenes/IntroMap.tscn"
 run/delta_sync_after_draw=true
 boot_splash/image="res://art/black.png"
 boot_splash/bg_color=Color( 0, 0, 0, 1 )
@@ -41,15 +41,11 @@ config/icon="res://icon.png"
 
 [autoload]
 
-Scheduler="*res://Scheduler.gd"
-HUD="*res://HUD.tscn"
-EmitterFactory="*res://EmitterFactory.gd"
-Manager="*res://Manager.tscn"
-SaveData="*res://SaveData.gd"
-
-[debug]
-
-settings/fps/force_fps=120
+Scheduler="*res://singletons/Scheduler.gd"
+HUD="*res://singletons/HUD.tscn"
+EmitterFactory="*res://singletons/EmitterFactory.gd"
+Manager="*res://singletons/Manager.tscn"
+SaveData="*res://singletons/SaveData.gd"
 
 [display]
 

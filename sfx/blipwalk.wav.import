@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/blipwalk.wav-0ab0f39d646e893abd4b4a1e8e3a25cc.sample"
+
+[deps]
+
+source_file="res://sfx/blipwalk.wav"
+dest_files=[ "res://.import/blipwalk.wav-0ab0f39d646e893abd4b4a1e8e3a25cc.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

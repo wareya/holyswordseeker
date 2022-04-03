@@ -41,7 +41,7 @@ I really like what OWH does where it makes it hard to stay in one place, it make
 
 #### HIGH PRIORITY
 
-- [ ] move loose files into subdirectories oops
+- [x] move loose files into subdirectories oops
 - [ ] buffs, debuffs
 - [ ] boss encounter(s), goal states, endings
 - [ ] game overs, save data/clear data, title screen

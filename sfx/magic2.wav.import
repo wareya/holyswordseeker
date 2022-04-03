@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/magic2.wav-bbe5e2478a810a31c48edda0b6451526.sample"
+
+[deps]
+
+source_file="res://sfx/magic2.wav"
+dest_files=[ "res://.import/magic2.wav-bbe5e2478a810a31c48edda0b6451526.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0
