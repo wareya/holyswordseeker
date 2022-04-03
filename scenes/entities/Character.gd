@@ -587,6 +587,15 @@ const item_db = {
         usable = true,
         consumable = true
     },
+    "pebble" : {
+        internal_name = "pebble",
+        name = "Pebble",
+        description = "A pebble. Does 1 HP of damage to whatever you throw it at.",
+        weight = 1,
+        hp = 1,
+        usable = true,
+        consumable = true
+    },
 }
 
 static func new_item(name : String):

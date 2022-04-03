@@ -42,13 +42,14 @@ var possibilities = [
 "potion",
 "potion",
 "potion",
-"dagger",
-"longsword",
-"scarf",
-"tough_robe",
-"chainmail",
-"leather_armor",
-"wayfarer_boots",
+"pebble",
+#"dagger",
+#"longsword",
+#"scarf",
+#"tough_robe",
+#"chainmail",
+#"leather_armor",
+#"wayfarer_boots",
 ]
 
 func random_pick(array : Array):

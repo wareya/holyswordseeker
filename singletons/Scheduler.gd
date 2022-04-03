@@ -45,7 +45,7 @@ func check_overspeed(old_playerdata = null):
             continue
         entity.reset_overspeed()
         var ent = {speed = entity.ent.stats.turnspeed(), turn_wait = entity.turn_wait, object = entity}
-        if entity == player and old_playerdata != null:
+        if entity == player and old_playerdata != null and old_playerdata.object == entity:
             ent = old_playerdata
         ents.push_back(ent)
     

@@ -29,6 +29,7 @@ func do_fade_anim(invert = false, fadein = false, fade_time = 0.75):
             $FadeLayer/ScreenFader.fadeamount = clamp(progress, 0.0, 1.0)
         
         yield(get_tree(), "idle_frame")
+        Scheduler.first = true # ensure overspeed check works on first turn
         
     fading = false
     emit_signal("fade_completed")
