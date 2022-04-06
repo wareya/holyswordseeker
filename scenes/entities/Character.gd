@@ -608,7 +608,7 @@ const item_db = {
         name = "Rock",
         description = "A nicely-sized rock. Does 10 attack worth of damage to whatever you throw it at. Range of 3 tiles.",
         weight = 1,
-        hp = 1,
+        attack = 10,
         usable = true,
         consumable = true
     },
@@ -1010,7 +1010,7 @@ class Effect extends Sprite:
 func add_effect(_texture : Texture, _frames : int = 1, _time = 0.2, _fadeout : bool = false):
     var fx = Effect.new(_texture, _frames, _time, _fadeout)
     add_child(fx)
-    fx.position = Vector2()
+    fx.global_position = logical_position()
     return fx
 
 func heading_effect(_texture : Texture, _frames : int = 1, _time = 0.2, _fadeout : bool = false):
@@ -1060,6 +1060,7 @@ func handle_action():
                 other.deal_damage(damage, self)
             else:
                 TextBubble.build(other.global_position, other.cutscene)
+            heading_effect(preload("res://art/slash fx.png"), 4, 0.15)
         else:
             if is_player:
                 EmitterFactory.emit("whiff")
@@ -1111,7 +1112,7 @@ func player_take_turn():
     return handle_action()
 
 
-var aggro_range = 3.0
+var aggro_range = 4.0
 var attack_range = 1.0
 
 func find_in_range(_range):
@@ -1160,6 +1161,7 @@ func ai_take_turn():
         aggro = find_in_range(aggro_range)
         if aggro:
             print("changing aggro target")
+    # FIXME this is broken and prevents the aggro range from working as intended
     if !is_in_range(target, attack_range):
         if is_in_range(aggro, attack_range):
             target = aggro
