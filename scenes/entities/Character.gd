@@ -20,14 +20,10 @@ func _ready():
     var _zoom = 2.0
     $Sprite/Camera2D.zoom = Vector2(1/_zoom, 1/_zoom)
     if !Engine.editor_hint:
-        #if is_player:
-            #ent.equip(new_item("longsword"))
-            #ent.equip(new_item("scarf"))
+        ent.connect("increase_message", self, "increase_message")
         ent.recalculate_stats()
-        pass
-    #last_pos = global_position
+    
     Scheduler.connect("player_turn_ready", self, "turn_ready")
-    pass # Replace with function body.
 
 var hud_target_alpha = 1.0
 
@@ -81,6 +77,8 @@ func _process(delta):
             $Relative.hide()
             if is_in_group("PointCollider"):
                 remove_from_group("PointCollider")
+            if is_in_group("Interactable"):
+                remove_from_group("Interactable")
             modulate.a = 0.5
             z_index = -1
         #find_node("Heading").rotation = heading.angle()
@@ -274,18 +272,25 @@ func advance_turn():
 
 var wishdir = Vector2()
 var action = ""
-var regen = 1/8.0
 
+var turns_taken : int = 0
+var regen_timer : int = 0
 func handle_action_begin():
     last_action = action
+    turns_taken += 1
+    regen_timer += 1
+    
+    var regen = 1
+    var regen_rate = 8
     if is_player:
-        regen = 1/8.0
-    if !is_player:
-        regen = 1/8.0/4.0
-    regen = 0.0
-    if ent.stats.hp < ent.stats_calc.hp:
-        ent.stats.hp = clamp(ent.stats.hp+regen, ent.stats.hp, ent.stats_calc.hp)
-    pass
+        regen_rate = 8
+    else:
+        regen_rate = 16
+    regen = 1.0
+    regen_timer %= regen_rate
+    if regen_timer == 0:
+        if ent.stats.hp < ent.stats_calc.hp:
+            ent.stats.hp = clamp(ent.stats.hp+regen, ent.stats.hp, ent.stats_calc.hp)
 func handle_action_end():
     cycle_interp_data(false)
     pass
@@ -344,6 +349,7 @@ class Stats extends Reference:
                 x = x.clone()
             new.set(prop.name, x)
         return new
+        
 
 enum {
     EQUIP_SLOT_NONE
@@ -436,10 +442,10 @@ const stat_db = {
         level = 1,
         hp = 24,
         mp = 0,
-        strength = 7,
+        strength = 10,
         willpower = 0,
-        endurance = 2,
-        perception = 3,
+        endurance = 3,
+        perception = 7,
         speed = 5,
         sprite = preload("res://art/mymob.png"),
     },
@@ -449,9 +455,9 @@ const stat_db = {
         hp = 10,
         mp = 20,
         strength = 3,
-        willpower = 10,
-        endurance = 20,
-        perception = 5,
+        willpower = 7,
+        endurance = 15,
+        perception = 1,
         speed = 3,
         sprite = preload("res://art/slime.png"),
     },
@@ -460,9 +466,9 @@ const stat_db = {
         level = 1,
         hp = 20,
         mp = 0,
-        strength = 10,
+        strength = 9,
         willpower = 0,
-        endurance = 5,
+        endurance = 4,
         perception = 10,
         speed = 7,
         sprite = preload("res://art/wolf.png"),
@@ -472,7 +478,7 @@ const stat_db = {
         level = 1,
         hp = 10,
         mp = 20,
-        strength = 5,
+        strength = 7,
         willpower = 5,
         endurance = 3,
         perception = 3,
@@ -598,6 +604,88 @@ const item_db = {
     },
 }
 
+var dust_effects = {
+    cat = {
+        internal_name = "cat",
+        name = "Feline Transmorphism",
+        desc = "You develop catlike features, heightened physical abilities, and a knack for magic. But you can no longer wear heavy armor, headgear, or pants, and your ability to carry items is lessened.",
+        stats = {
+            strength = 2,
+            willpower = 2,
+            endurance = 2,
+            perception = 2,
+            speed = 2,
+            capacity = -10,
+        },
+        score = 1,
+        # non-stat: sprite change, armor mechanics change
+    },
+    age = {
+        internal_name = "age",
+        name = "Elderliness",
+        desc = "You suffer a hard hit to many of your physical abilities, but your power of will grows stronger. Also, your hair turns white.",
+        stats = {
+            strength = -3,
+            willpower = 5,
+            endurance = -3,
+            perception = -3,
+            speed = -3,
+        },
+        score = 3,
+        # non-stat: sprite change
+    },
+    vampire = {
+        internal_name = "vampire",
+        name = "Vampirism",
+        desc = "A strong sense of power, both physical and magical, fills you, yet you need to consume blood to continue to survive.",
+        stats = {
+            strength = 5,
+            willpower = 5,
+            endurance = 5,
+            perception = 5,
+            speed = 5,
+        },
+        score = -3,
+        # non-stat: you need to kill living vertebrate enemies once per 20 turns or your health starts draining (down to 1 hp). can be cured with any holy consumable item. sprite change (eye color)
+    },
+    immortal = {
+        internal_name = "immortal",
+        name = "Biological Immortality",
+        desc = "The fates have taken pity on you, and made it so that you do not age or fall ill, and your constitution is strengthened. Yet you cannot grow, and wounds may still kill.",
+        stats = {
+            hp = 40,
+            endurance = 10,
+            perception = 5,
+        },
+        score = 1,
+        # non-stat: you don't gain *any* experience. prevents you from gaining positive-scored traits. can only be cured by using cursed items.
+    },
+    dustblind = {
+        internal_name = "dustblind",
+        name = "Dustblindness",
+        desc = "You can no longer see the places you have once seen, or where you once were.",
+        score = 3,
+        # non-stat: fog of war resets every single turn
+    },
+    slowgrowth = {
+        internal_name = "slowgrowth",
+        name = "Slowgrowth",
+        desc = "You now grow stronger more slowly than before.",
+        score = 3,
+        # non-stat: you only receive 60% of the xp you normally do
+    },
+    pain = {
+        internal_name = "pain",
+        name = "Pain of Life",
+        desc = "Your every bone aches, and your limbs struggle to move as they should. Your health deteriorates, and you struggle to act quickly.",
+        stats = {
+            speed = -5,
+        },
+        score = 5
+        # non-stat: health drain instead of regen. stops at 50%
+    },
+}
+
 static func new_item(name : String):
     if name in item_db:
         var data = item_db[name]
@@ -616,6 +704,9 @@ class Entity extends Reference:
     var stats_base = Stats.new()
     var stats_calc = Stats.new() # counting equipment
     var stats = Stats.new() # counting damage
+
+    var xp = 0 # out of 100 per level
+    
     var gear = []
     
     func equip(item) -> Item:
@@ -663,11 +754,31 @@ class Entity extends Reference:
             var a = stats_calc.get(prop.name)
             var b = old_calc.get(prop.name)
             var delta = a - b
-            if delta != 0:
-                print("delta for %s: %s" % [prop.name, delta])
+            #if delta != 0:
+            #    print("delta for %s: %s" % [prop.name, delta])
             var c = stats.get(prop.name)
             stats.set(prop.name, c + delta)
+    
+    func random_pick(array : Array):
+        return array[randi() % array.size()]
+    
+    signal increase_message
+    func levelup():
+        stats_base.level += 1
+        var hp_boost = max(4, stats_base.endurance)
+        var mp_boost = max(4, stats_base.willpower)
+        stats_base.hp += hp_boost
+        stats_base.mp += mp_boost
         
+        #var which : String = random_pick(["strength", "willpower", "endurance", "perception", "speed"])
+        var which : String = random_pick(["strength", "endurance", "speed"])
+        stats_base.set(which, stats_base.get(which) + 1)
+        
+        emit_signal("increase_message", ["HP", hp_boost])
+        emit_signal("increase_message", ["MP", mp_boost])
+        emit_signal("increase_message", [which.capitalize(), 1])
+        
+        recalculate_stats()
     
     func clone() -> Entity:
         var new = Entity.new()
@@ -685,6 +796,39 @@ class Entity extends Reference:
 var ent = Entity.new()
 var inventory = []
 
+func increase_message(what, amount):
+    _log("%s's %s increased by %s" % [ent_name, what, amount])
+
+func gain_xp(other_ent : Entity):
+    var level = ent.stats_base.level
+    
+    var other_effective_level = 0.0
+    for what in ["strength", "willpower", "endurance", "perception", "speed"]:
+        other_effective_level += other_ent.stats_base.get(what)
+    other_effective_level -= 25.0
+    other_effective_level += 1.0
+    
+    level = max(1, level)
+    other_effective_level = max(1, other_effective_level)
+    
+    var hpdiff = other_ent.stats_base.hp - ent.stats_base.hp
+    hpdiff /= max(1, (other_ent.stats_base.hp + ent.stats_base.hp)/2.0)
+    
+    var gained = 20 + 4*(other_effective_level - level) + 4*hpdiff
+    gained = max(gained, gained/2.0+2)
+    gained = ceil(max(1, gained))
+    ent.xp += gained
+    
+    _log("%s gained %s%% experience" % [ent_name, gained])
+    
+    check_levelup()
+
+func check_levelup():
+    while ent.xp >= 100:
+        ent.xp -= 100
+        ent.levelup()
+        _log("%s levelled up to level %s!" % [ent_name, ent.stats_base.level])
+
 func set_tile_position(where : Vector2):
     global_position = where*16.0 + Vector2(8.0, 8.0)
     interp_pos = [global_position]
@@ -700,7 +844,10 @@ func cannot_act():
     return ent.stats.hp <= 0
 
 func deal_damage(amount, _other):
-    ent.stats.hp = max(0, ent.stats.hp-amount)
+    if amount > 0.0:
+        regen_timer = 0.0
+        ent.stats.hp = max(0, ent.stats.hp-amount)
+
 func heal_damage(amount, _other):
     ent.stats.hp = min(ent.stats_calc.hp, ent.stats.hp+amount)
     _log("%s healed %s hp" % [ent_name, amount])
@@ -821,6 +968,7 @@ func handle_action():
                     EmitterFactory.emit("hit")
                 var damage = ent.stats.damage(other.ent.stats)
                 other.deal_damage(damage, self)
+                
                 _log("%s dealt %s damage to %s" % [ent_name, damage, other.ent_name])
                 var color = "white"
                 if !is_player:
@@ -828,7 +976,12 @@ func handle_action():
                 if damage < 0:
                     color = "green"
                 if is_player or has_been_seen:
+                    if damage == 0.0:
+                        damage = 0.0
                     add_text_effect(damage, other.global_position, color)
+                
+                if other.ent.stats.hp <= 0.0:
+                    gain_xp(other.ent)
             else:
                 TextBubble.build(other.global_position, other.cutscene)
         else:
@@ -895,11 +1048,11 @@ func is_in_range(other, _range):
 
 func writeinfo():
     return """Name: {name}
-HP: {hp}/{hp_max} MP: {mp}/{mp_max}
+HP: {hp}/{hp_max} MP: {mp}/{mp_max} Level: {level} Exp: {xp}
 Str: {str} Will: {will} End: {end} Perc: {perc} Speed: {speed}
 Atk: {atk} Def: {def} Attune: {attune} Defy: {defy}
 Agi: {agi}""".format(
-    { name = ent_name,
+    { name = ent_name, level = ent.stats_base.level, xp = ent.xp,
       hp = ent.stats.hp, hp_max = ent.stats_calc.hp, mp = ent.stats.mp, mp_max = ent.stats_calc.mp,
       str = ent.stats.strength, will = ent.stats.willpower, end = ent.stats.endurance, perc = ent.stats.perception, speed = ent.stats.speed,
       atk = ent.stats.attack, def = ent.stats.defense, attune = ent.stats.attunement, defy = ent.stats.defiance,

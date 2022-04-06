@@ -36,27 +36,8 @@ func check_empty():
         disabled = true
         visible = false
 
-var possibilities = [
-"potion",
-"potion",
-"potion",
-"potion",
-"potion",
-"pebble",
-#"dagger",
-#"longsword",
-#"scarf",
-#"tough_robe",
-#"chainmail",
-#"leather_armor",
-#"wayfarer_boots",
-]
-
 func random_pick(array : Array):
     return array[randi() % array.size()]
-
-func randomify():
-    inventory = [Character.new_item(random_pick(possibilities))]
 
 func _process(delta):
     check_empty()

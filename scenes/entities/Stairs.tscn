@@ -3,7 +3,7 @@
 [ext_resource path="res://art/groundicons.png" type="Texture" id=1]
 [ext_resource path="res://scenes/entities/Stairs.gd" type="Script" id=2]
 
-[node name="Stairs" type="Node2D" groups=["Trigger"]]
+[node name="Stairs" type="Node2D" groups=["Stairs", "Trigger"]]
 position = Vector2( 648, 248 )
 z_index = -2
 script = ExtResource( 2 )

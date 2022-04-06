@@ -3,7 +3,6 @@ extends CanvasLayer
 func get_sec():
     return OS.get_ticks_usec()/1_000_000.0
 
-
 var fade_contrast = 1.0
 var fade_color : Color = Color.black
 signal fade_completed
@@ -42,6 +41,10 @@ func wipe_fade_in(flat = false):
     fade_contrast = 0.0 if flat else 1.0
     return do_fade_anim(false, true)
 
+
+var floor_seeds = {}
+var current_floor = 0
+var current_floor_name = "The Edge of Dust"
 
 var last_entered_room_name = ""
 var changing_room = false

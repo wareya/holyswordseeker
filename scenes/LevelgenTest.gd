@@ -1,6 +1,5 @@
 extends Node2D
 
-
 enum TILE {
     OPEN,
     CLOSED
@@ -77,6 +76,9 @@ func _ready():
     var _seed = OS.get_unix_time()
     #_seed = 0
     #_seed = 1647961932
+    #_seed = 1649033351
+    #_seed = 1649033351
+    #_seed = 1649204741
     print("seed: %s" % _seed)
     seed(_seed)
     
@@ -92,7 +94,73 @@ func _ready():
 func random_pick(array : Array):
     return array[randi() % array.size()]
 
+var configurations = {
+    "basic" : {
+        w = 64,
+        h = 64,
+        capacity = 1.0/4.0,
+        
+        island_eraser_modifier = 9.0,
+        island_eraser_cap = 0.9,
+        dead_end_passes = 3,
+        
+        # name, rolls, chance per roll
+        monsters_possibilities = [
+            ["skeleton", 1, 1.0],
+            ["skeleton", 2, 0.5],
+            ["slime", 1, 1.0],
+            ["slime", 2, 0.5],
+            ["wolf", 1, 0.75],
+            ["eartheater", 3, 0.5],
+        ],
+        
+        # name, rolls, chance per roll
+        drops_possibilities = [
+            ["potion", 5, 0.5],
+            ["pebble", 3, 0.5],
+            ["dagger", 1, 1.0],
+            ["dagger", 1, 0.2],
+            ["longsword", 1, 0.1],
+            ["scarf", 1, 0.2],
+            ["tough_robe", 1, 0.2],
+            ["chainmail", 1, 0.1],
+            ["wayfarer_boots", 1, 0.05],
+        ],
+        
+        features_min = 3,
+        features_max = 5,
+        possible_structures = [Prefab],
+        
+        floor_tile = "cobble",
+        wall_tile = "wall SOLID",
+        
+        fog_enabled = true,
+        
+        name = "Living Passages",
+    }
+}
+
+#func randomify():
+#    inventory = [Character.new_item(random_pick(possibilities))]
+
+# inclusive, inclusive
+func randi_range(_min, _max) -> int:
+    return (randi() % (int(_max + 1) - int(_min))) + _min
+
+var config = configurations["basic"].duplicate()
+
+func get_configuration():
+    if Manager.current_floor == 1:
+        config = configurations.basic.duplicate()
+    else:
+        config = configurations.basic.duplicate()
+    Manager.current_floor_name = config.name
+    w = config.w
+    h = config.h
+
 func generate_map():
+    get_configuration()
+    
     for y in range(h):
         for x in range(w):
             map[Vector2(x, y)] = TILE.CLOSED
@@ -110,14 +178,18 @@ func generate_map():
             var v2 = pick + dir*2
             if !valid_coord(v2):
                 continue
-            if not v2 in openset or randf() < loop_frequency:
+            if not v2 in openset:
+                valid_dirs.push_back(dir)
+            elif randf() < loop_frequency:
                 valid_dirs.push_back(dir)
         if valid_dirs.size() == 0:
             frontier.remove(i)
             continue
-        valid_dirs.shuffle()
-        open(pick + valid_dirs[0], true)
-        open(pick + valid_dirs[0]*2)
+        var chosen_dir = random_pick(valid_dirs)
+        open(pick + chosen_dir, true)
+        open(pick + chosen_dir*2)
+    
+    print("size of open set after growing maze: ", openset.size())
     
     # fill in edges
     for y in range(h+2):
@@ -129,84 +201,91 @@ func generate_map():
         map[Vector2(x,  h)] = TILE.CLOSED
     
     # scan for and close up short dead ends
-    for _i in range(3):
-        for _v in openset.keys():
-            var sum = 1
-            for dir in directions:
-                var v = _v + dir
-                if !valid_coord(v):
-                    continue
-                if map[v] == TILE.OPEN:
-                    sum += 1
-            if sum == 2:
-                map[_v] = TILE.CLOSED
-                openset.erase(_v)
+    if true:
+        for _i in range(config.dead_end_passes):
+            var map_copy = map.duplicate()
+            for _v in openset.keys():
+                var sum = 1
                 for dir in directions:
                     var v = _v + dir
                     if !valid_coord(v):
                         continue
-                    if v in openset:
-                        openset.erase(v)
-                    if map[v] != TILE.CLOSED:
-                        map[v] = TILE.CLOSED
-                        openset.erase(v)
+                    if map[v] == TILE.OPEN:
+                        sum += 1
+                if sum == 2:
+                    map_copy[_v] = TILE.CLOSED
+                    openset.erase(_v)
+                    for dir in directions:
+                        var v = _v + dir
+                        if !valid_coord(v):
+                            continue
+                        if map[v] != TILE.CLOSED:
+                            map_copy[v] = TILE.CLOSED
+                            openset.erase(v)
+            map = map_copy
+    
+    print("size of open set after closing dead ends: ", openset.size())
     
     # scan for and open up small wall islands
-    var islands = {}
-    for y in range(h+2):
-        y -= 1
-        for x in range(w+2):
-            x -= 1
-            var v = Vector2(x, y)
-            if map[v] == TILE.CLOSED:
-                var found = false
-                var added = false
-                for base in islands:
-                    if v in islands[base]:
-                        found = true
-                        break
-                    for dir in directions:
-                        var v2 = v + dir
-                        if v2 in islands[base]:
-                            islands[base][v] = null
-                            added = true
+    if true:
+        var islands = {}
+        for y in range(h+2):
+            y -= 1
+            for x in range(w+2):
+                x -= 1
+                var v = Vector2(x, y)
+                if map[v] == TILE.CLOSED:
+                    var found = false
+                    var added = false
+                    for base in islands:
+                        if v in islands[base]:
+                            found = true
+                            break
+                        for dir in directions:
+                            var v2 = v + dir
+                            if v2 in islands[base]:
+                                islands[base][v] = null
+                                added = true
+                                break
+                        if added:
                             break
                     if added:
-                        break
-                if added:
-                    continue
-                if found:
-                    continue
-                islands[v] = {v : null}
-    
-    for v in islands.keys():
-        if Vector2(-1, -1) in islands[v]:
-            islands.erase(v)
-    
-    var island_eraser_modifier = 9.0
-    var island_eraser_cap = 0.9
-    for v in islands.keys():
-        var size = islands[v].size()
-        var erase_chance = (1.0+island_eraser_modifier)/(size+island_eraser_modifier)
-        erase_chance *= island_eraser_cap
+                        continue
+                    if found:
+                        continue
+                    islands[v] = {v : null}
         
-        if randf() < erase_chance:
-            for v2 in islands[v]:
-                open(v2)
-            islands.erase(v)
+        for v in islands.keys():
+            if Vector2(-1, -1) in islands[v]:
+                islands.erase(v)
+        
+        #var island_eraser_modifier = 9.0
+        #var island_eraser_cap = 0.9
+        for v in islands.keys():
+            var size = islands[v].size()
+            var erase_chance = (1.0+config.island_eraser_modifier)/(size+config.island_eraser_modifier)
+            erase_chance *= config.island_eraser_cap
+            
+            if randf() < erase_chance:
+                for v2 in islands[v]:
+                    open(v2)
+                islands.erase(v)
     
     
     # add features
     var added_features = {} # for rejecting overlapping features
-    for i in range(5):
-        var prefab = Prefab.new()
+    for i in range(randi_range(config.features_min, config.features_max)):
         var allowed = openset.keys()
+        if allowed.size() == 0:
+            break
+        
+        var prefab = random_pick(config.possible_structures).new()
         var pick = allowed[randi()%allowed.size()]
         var repick = true
         while repick:
             var start = pick + prefab.rect.position
             var end = pick + prefab.rect.end
-            if start.x == 0 or start.y == 0 or end.x >= w or end.y >= h:
+            if start.x <= 1 or start.y <= 1 or end.x+1 >= w or end.y+1 >= h:
                 repick = true
             else:
                 repick = false
@@ -220,6 +299,7 @@ func generate_map():
                     continue
                 allowed.erase(pick)
                 pick = allowed[randi()%allowed.size()]
+        
         if allowed.size() == 0:
             continue
         
@@ -254,21 +334,26 @@ func generate_map():
     player.is_player = true
     place_entity(player)
     
-    place_entity(preload("res://scenes/entities/Stairs.tscn").instance())
+    var exit = preload("res://scenes/entities/Stairs.tscn").instance()
+    exit.next_floor = Manager.current_floor + 1
+    place_entity(exit)
     
-    for _i in range(6):
-        var stuff = preload("res://scenes/entities/Pickup.tscn").instance()
-        stuff.randomify()
-        place_entity(stuff)
-        
-    for _i in range(6):
-        if open.size() == 0:
-            return
-        var possibilities = ["skeleton", "wolf", "slime", "eartheater"]
-        var enemy = ent.instance()
-        enemy.is_player = false
-        enemy.as_a = random_pick(possibilities)
-        place_entity(enemy)
+    for info in config.drops_possibilities:
+        for n in info[1]:
+            if randf() >= info[2]:
+                continue
+            var stuff = preload("res://scenes/entities/Pickup.tscn").instance()
+            stuff.inventory = [Character.new_item(info[0])]
+            place_entity(stuff)
+    
+    for info in config.monsters_possibilities:
+        for n in info[1]:
+            if randf() >= info[2]:
+                continue
+            var enemy = ent.instance()
+            enemy.is_player = false
+            enemy.as_a = info[0]
+            place_entity(enemy)
     
 func place_entity(entity):
     tiles.add_child(entity)
@@ -298,9 +383,15 @@ func init_fog():
     maximum.x += x_margin
     minimum.y -= y_margin
     maximum.y += y_margin
+    
     for y in range(minimum.y, maximum.y):
         for x in range(minimum.x, maximum.x):
             fog.set_cellv(Vector2(x, y), 0)
+    
+    if !config.fog_enabled:
+        for y in range(0, h):
+            for x in range(0, w):
+                fog.set_cellv(Vector2(x, y), -1)
     
     fog.update_bitmask_region()
     
@@ -309,6 +400,9 @@ func init_fog():
         entity.has_been_seen = false
 
 func tile_is_solid(map : TileMap, v : Vector2) -> bool:
+    var rect : Rect2 = map.get_used_rect()
+    if !rect.has_point(v):
+        return false
     var tile = map.get_cellv(v.round())
     var tname : String = map.tile_set.tile_get_name(tile)
     return "SOLID" in tname
@@ -344,6 +438,20 @@ func update_fog():
     var player = Scheduler.find_player()
     if !player:
         return
+    
+    var damaged = {}
+    var exit = get_tree().get_nodes_in_group("Stairs")
+    var exit_pos = null
+    if exit.size() > 0:
+        exit = exit[0]
+    else:
+        exit = null
+    if exit:
+        exit_pos = fog.world_to_map(exit.global_position)
+        fog.set_cellv(exit_pos, -1)
+        damaged[exit_pos] = null
+        fog.update_bitmask_region(exit_pos + Vector2(-1, -1), exit_pos + Vector2(1, 1))
+    
     var pos = fog.world_to_map(player.logical_position())
     if pos == player_last_pos:
         return
@@ -359,6 +467,7 @@ func update_fog():
             if fog.get_cellv(pos+v) == -1:
                 continue
             if abs(v.x) <= force_range and abs(v.y) <= force_range:
+                damaged[pos+v] = null
                 fog.set_cellv(pos+v, -1)
             else:
                 # TODO: make more efficient by knowing which tiles internal to the raycast are clear
@@ -366,8 +475,37 @@ func update_fog():
                 # so that we only need to raycast the edge tiles and not the internal ones
                 for dir in [Vector2(-1, -1), Vector2(-1, 1), Vector2(1, -1), Vector2(1, 1)]:
                     if !raycast_in_tilemap(tiles, pos, pos+v+dir/16.0):
+                        damaged[pos+v] = null
                         fog.set_cellv(pos+v, -1)
                         break
+    
+    if true:
+        for v in damaged:
+        #for y in h:
+        #    for x in w:
+                var clear = false
+                #var v = Vector2(x, y)
+                var fog_tile = $FogOfWar.get_cellv(v)
+                if fog_tile == -1:
+                    clear = true
+                #elif $FogOfWar.tile_set.autotile_get_bitmask(fog_tile, $FogOfWar.get_cell_autotile_coord(v.x, v.y)) != 0b111111111:
+                #    clear = true
+                # do edges
+                if clear:
+                    var map_tile = $TileMap.get_cellv(v)
+                    var map_tile_name : String = $TileMap.tile_set.tile_get_name(map_tile)
+                    if !map_tile_name.ends_with("SOLID"):
+                        var tile_coord = $TileMap.get_cell_autotile_coord(v.x, v.y)
+                        var bitmask = $TileMap.tile_set.autotile_get_bitmask(map_tile, tile_coord)
+                        if bitmask == 0b111111111:
+                            tile_coord = Vector2(9, 2)
+                        $Minimap/Tiles.set_cellv(v, 0, false, false, false, tile_coord)
+        
+        $Minimap/PlayerIcon.position = $Minimap/Tiles.position + pos * $Minimap/Tiles.cell_size * $Minimap/Tiles.scale
+        $Minimap/PlayerIcon.scale = $Minimap/Tiles.scale * 2.0
+        
+        $Minimap/StairIcon.position = $Minimap/Tiles.position + exit_pos * $Minimap/Tiles.cell_size * $Minimap/Tiles.scale
+        $Minimap/StairIcon.scale = $Minimap/Tiles.scale * 2.0
     
     var __range = Vector2.ONE*(_range+1)
     fog.update_bitmask_region(pos - __range, pos + __range)
