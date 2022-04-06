@@ -209,15 +209,12 @@ func cmd_use(args : Array, get_desc = false):
         console_print_err("no such item %s in inventory" % i)
         return
     
-    var item = player.inventory.pop_at(i)
+    var item = player.inventory[i]
     if item.usable:
         item.use(player)
     else:
         console_print_err("item `%s` is not usable" % item.internal_name)
     
-    if !item.consumable:
-        player.inventory.insert(i, item)
-    player.ent.recalculate_stats()
 
 func cmd_unequip(args : Array, get_desc = false):
     if get_desc:

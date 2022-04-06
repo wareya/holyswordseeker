@@ -89,7 +89,7 @@ var focused = true
 
 export var cutscene = []
 
-var chars_per_second = 60.0*2.5
+var chars_per_second = 60.0*3.5
 
 signal done
 var text_characters = -1

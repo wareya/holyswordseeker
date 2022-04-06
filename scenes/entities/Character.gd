@@ -174,9 +174,9 @@ func rounded_position(pos : Vector2) -> Vector2:
     return (pos/16.0 + Vector2(0.5, 0.5)).floor()*16.0 - Vector2(8, 8)
 
 func probe(_wishdir : Vector2, move = false) -> Object:
-    _wishdir.x = sign(_wishdir.x)
-    _wishdir.y = sign(_wishdir.y)
-    _wishdir *= 16
+    _wishdir.x = round(_wishdir.x)
+    _wishdir.y = round(_wishdir.y)
+    _wishdir *= 16.0
     for entity in get_tree().get_nodes_in_group("PointCollider"):
         if entity == self:
             continue
@@ -271,7 +271,7 @@ func advance_turn():
         return ret
 
 var wishdir = Vector2()
-var action = ""
+var action = null
 
 var turns_taken : int = 0
 var regen_timer : int = 0
@@ -377,6 +377,7 @@ class Item extends Reference:
     var slot = EQUIP_SLOT_NONE
     var usable = false
     var consumable = false
+    var stackable = false
     
     static func _clone_internal(old, new):
         for prop in old.get_property_list():
@@ -406,11 +407,20 @@ class Item extends Reference:
                 s += " %s: %s" % [prop.name.capitalize(), x]
         return s
     
-    func use(user):
+    func use(user : Character):
         if internal_name == "potion":
             user.heal_damage(stats.hp, user)
             if user.is_player or user.has_been_seen:
                 user.add_text_effect(stats.hp, user.global_position, "#3F3")
+        if internal_name == "rock":
+            user.action = RockThrow.new(self)
+        
+        if consumable:
+            var index = user.inventory.find(self)
+            if index >= 0:
+                user.inventory.remove(index)
+        
+        user.ent.recalculate_stats()
 
 const stat_db = {
     "player" : {
@@ -593,10 +603,10 @@ const item_db = {
         usable = true,
         consumable = true
     },
-    "pebble" : {
-        internal_name = "pebble",
-        name = "Pebble",
-        description = "A pebble. Does 1 HP of damage to whatever you throw it at.",
+    "rock" : {
+        internal_name = "rock",
+        name = "Rock",
+        description = "A nicely-sized rock. Does 10 attack worth of damage to whatever you throw it at. Range of 3 tiles.",
         weight = 1,
         hp = 1,
         usable = true,
@@ -829,6 +839,72 @@ func check_levelup():
         ent.levelup()
         _log("%s levelled up to level %s!" % [ent_name, ent.stats_base.level])
 
+# TODO: add skill that temporarily gives a massive speed boost until the player next attacks or X turns expire
+class Skill extends Reference:
+    var stats : Stats = Stats.new(true)
+    
+    func consumes_turn(by : Character):
+        return false
+    
+    func perform(by : Character):
+        pass
+
+class RockThrow extends Skill:
+    class Anim extends Sprite:
+        var life = 0.0
+        var max_life = Scheduler._turn_time * 0.5
+        var start : Vector2
+        var end : Vector2
+        func _init(_start : Vector2, _end : Vector2):
+            start = _start
+            end = _end
+            texture = preload("res://art/projectile effect.png")
+        
+        func _process(delta):
+            life += delta/max_life
+            life = clamp(life, 0.0, 1.0)
+            global_position = lerp(start, end, life)
+            if life >= 1.0:
+                queue_free()
+            
+    var original : Item
+    func _init(_original = null):
+        original = _original
+        stats.attack = 10
+    func consumes_turn(by : Character):
+        return true
+    func perform(by : Character):
+        EmitterFactory.emit(preload("res://sfx/fwup.wav"))
+        var target = Vector2()
+        var other = null
+        for _i in range(3):
+            target += by.heading
+            other = by.probe(target)
+            if other:
+                break
+        
+        if other is TileMap:
+            target -= by.heading
+        
+        var anim = Anim.new(by.logical_position(), by.logical_position() + target*16.0)
+        by.get_parent().add_child(anim)
+        
+        if other and not other is TileMap:
+            var damage = stats.damage(other.ent.stats)
+            other.deal_damage(damage, by)
+            return
+        
+        var where = by.logical_position() + target * 16.0
+        var what = load("res://scenes/entities/Pickup.tscn").instance()
+        what.hide_temporarily = 1.0
+        if original:
+            what.inventory = [original]
+        else:
+            what.inventory = [by.new_item("rock")]
+        by.get_parent().add_child(what)
+        what.global_position = where
+        
+
 func set_tile_position(where : Vector2):
     global_position = where*16.0 + Vector2(8.0, 8.0)
     interp_pos = [global_position]
@@ -843,10 +919,24 @@ func _log(text : String):
 func cannot_act():
     return ent.stats.hp <= 0
 
-func deal_damage(amount, _other):
+func deal_damage(amount, other):
     if amount > 0.0:
         regen_timer = 0.0
         ent.stats.hp = max(0, ent.stats.hp-amount)
+    
+    _log("%s dealt %s damage to %s" % [ent_name, amount, other.ent_name])
+    var color = "white"
+    if !is_player:
+        color = "yellow"
+    if amount < 0:
+        color = "green"
+    if is_player or has_been_seen:
+        if amount == 0.0:
+            amount = 0.0
+        add_text_effect(amount, global_position, color)
+    
+    if ent.stats.hp <= 0.0:
+        other.gain_xp(ent)
 
 func heal_damage(amount, _other):
     ent.stats.hp = min(ent.stats_calc.hp, ent.stats.hp+amount)
@@ -929,10 +1019,10 @@ func heading_effect(_texture : Texture, _frames : int = 1, _time = 0.2, _fadeout
     fx.rotation = heading.angle() + PI/2
     return fx
 
-var last_action = ""
+var last_action = null
 
 func turn_ready():
-    if last_action != "move":
+    if not last_action is String or last_action != "move":
         return
     for trigger in get_tree().get_nodes_in_group("PostTrigger"):
         if global_position.distance_to(trigger.global_position) < 8.0:
@@ -940,11 +1030,11 @@ func turn_ready():
             trigger.trigger(self)
 
 func handle_action():
-    if action != "" and action != "move":
+    if action != null and (not action is String or action != "move"):
         #_log("%s is acting %s %s %s" % [ent_name, action, wishdir, heading])
         handle_action_begin()
     var return_value = TURN_END_NONE
-    if action == "move":
+    if action is String and action == "move":
         if attempt_motion(wishdir):
             handle_action_begin()
             return_value = TURN_END_INSTANT
@@ -954,7 +1044,7 @@ func handle_action():
                         print("triggering pre trigger")
                         if trigger.trigger(self):
                             return_value = TURN_END_ANIMATE
-    elif action == "interact":
+    elif action is String and action == "interact":
         var other : Node = probe(heading)
         if other and other.is_in_group("Interactable"):
             if !(is_player and other.is_friendly):
@@ -968,20 +1058,6 @@ func handle_action():
                     EmitterFactory.emit("hit")
                 var damage = ent.stats.damage(other.ent.stats)
                 other.deal_damage(damage, self)
-                
-                _log("%s dealt %s damage to %s" % [ent_name, damage, other.ent_name])
-                var color = "white"
-                if !is_player:
-                    color = "yellow"
-                if damage < 0:
-                    color = "green"
-                if is_player or has_been_seen:
-                    if damage == 0.0:
-                        damage = 0.0
-                    add_text_effect(damage, other.global_position, color)
-                
-                if other.ent.stats.hp <= 0.0:
-                    gain_xp(other.ent)
             else:
                 TextBubble.build(other.global_position, other.cutscene)
         else:
@@ -993,8 +1069,17 @@ func handle_action():
             heading_effect(preload("res://art/slash fx.png"), 4, 0.15)
         return_value = TURN_END_ANIMATE
     
+    elif action is Skill:
+        action.perform(self)
+        if action.consumes_turn(self):
+            return_value = TURN_END_ANIMATE
+        else:
+            return_value = TURN_END_NONE
+    
     if return_value != TURN_END_NONE:
         handle_action_end()
+    
+    action = null
     
     return return_value
 
@@ -1004,7 +1089,6 @@ func player_take_turn():
     if !Scheduler.is_simulation_allowed():
         return TURN_END_NONE
     wishdir = Vector2()
-    action = ""
     if Input.is_action_pressed("ui_down"):
         wishdir.y += 1
     if Input.is_action_pressed("ui_up"):
@@ -1059,6 +1143,7 @@ Agi: {agi}""".format(
       agi = ent.stats.agility
     })
 
+
 var aggro = null
 var target = null
 export var immobile = false
@@ -1069,7 +1154,7 @@ func ai_take_turn():
         # TODO: add friendly AI
         return TURN_END_INSTANT
     wishdir = Vector2()
-    action = ""
+    action = null
     
     if !is_in_range(aggro, aggro_range):
         aggro = find_in_range(aggro_range)

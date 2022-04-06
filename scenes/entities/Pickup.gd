@@ -1,6 +1,11 @@
 extends Node2D
 
 func _ready():
+    if hide_temporarily > 0.0:
+        modulate.a = 0.0
+    else:
+        modulate.a = 1.0
+    
     for item in items:
         inventory.push_back(Character.new_item(item))
 
@@ -39,7 +44,13 @@ func check_empty():
 func random_pick(array : Array):
     return array[randi() % array.size()]
 
+var hide_temporarily = 0.0
 func _process(delta):
+    if hide_temporarily > 0.0:
+        modulate.a = 0.0
+        hide_temporarily -= 2.0*delta/Scheduler._turn_time
+    else:
+        modulate.a = 1.0
     check_empty()
 
 var disabled = false

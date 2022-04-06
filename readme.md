@@ -35,9 +35,9 @@ I really like what OWH does where it makes it hard to stay in one place, it make
 
 #### IMPERATIVE PRIOTITY
 
-- [ ] leveling
-- [ ] skills
-- [ ] more items, enemies, level generator configurations, etc
+- [x] leveling
+- [x] skill system
+- [ ] more items, skills, enemies, level generator configurations, etc
 
 #### HIGH PRIORITY
 

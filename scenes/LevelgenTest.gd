@@ -57,21 +57,6 @@ class Prefab:
         for v2 in dict.keys():
             map[v + v2] = dict[v2]
 
-class entrance extends Prefab:
-    var reference = \
-    """
-    .........
-    .xxx.xxx.
-    .x.....x.
-    ....x....
-    ox..n..xo
-    oxn...nxo
-    ox.....xo
-    ox..p..xo
-    ox.....xo
-    oxxxxxxxo
-    """
-
 func _ready():
     var _seed = OS.get_unix_time()
     #_seed = 0
@@ -79,6 +64,8 @@ func _ready():
     #_seed = 1649033351
     #_seed = 1649033351
     #_seed = 1649204741
+    #_seed = 1649219439
+    #_seed = 1649219805
     print("seed: %s" % _seed)
     seed(_seed)
     
@@ -95,9 +82,48 @@ func random_pick(array : Array):
     return array[randi() % array.size()]
 
 var configurations = {
+    "opening" : {
+        w = 40,
+        h = 40,
+        capacity = 1.0/4.0,
+        
+        island_eraser_modifier = 9.0,
+        island_eraser_cap = 0.9,
+        dead_end_passes = 3,
+        
+        # name, rolls, chance per roll
+        monsters_possibilities = [
+            ["slime", 1, 1.0],
+            ["slime", 2, 0.5],
+            ["eartheater", 1, 1.0],
+            ["eartheater", 1, 0.5],
+        ],
+        
+        # name, rolls, chance per roll
+        drops_possibilities = [
+            ["potion", 1, 1.0],
+            ["potion", 3, 0.5],
+            ["rock", 1, 1.0],
+            ["rock", 1, 0.5],
+            ["dagger", 1, 1.0],
+            ["scarf", 1, 0.2],
+            ["tough_robe", 1, 0.2],
+        ],
+        
+        features_min = 1,
+        features_max = 3,
+        possible_structures = [Prefab],
+        
+        floor_tile = "cobble",
+        wall_tile = "wall SOLID",
+        
+        fog_enabled = true,
+        
+        name = "Living Passages",
+    },
     "basic" : {
-        w = 64,
-        h = 64,
+        w = 48,
+        h = 48,
         capacity = 1.0/4.0,
         
         island_eraser_modifier = 9.0,
@@ -117,8 +143,7 @@ var configurations = {
         # name, rolls, chance per roll
         drops_possibilities = [
             ["potion", 5, 0.5],
-            ["pebble", 3, 0.5],
-            ["dagger", 1, 1.0],
+            ["rock", 3, 0.5],
             ["dagger", 1, 0.2],
             ["longsword", 1, 0.1],
             ["scarf", 1, 0.2],
@@ -127,8 +152,8 @@ var configurations = {
             ["wayfarer_boots", 1, 0.05],
         ],
         
-        features_min = 3,
-        features_max = 5,
+        features_min = 1,
+        features_max = 3,
         possible_structures = [Prefab],
         
         floor_tile = "cobble",
@@ -137,21 +162,19 @@ var configurations = {
         fog_enabled = true,
         
         name = "Living Passages",
-    }
+    },
 }
-
-#func randomify():
-#    inventory = [Character.new_item(random_pick(possibilities))]
 
 # inclusive, inclusive
 func randi_range(_min, _max) -> int:
     return (randi() % (int(_max + 1) - int(_min))) + _min
 
-var config = configurations["basic"].duplicate()
+var config = configurations.opening.duplicate()
 
 func get_configuration():
     if Manager.current_floor == 1:
-        config = configurations.basic.duplicate()
+        config = configurations.opening.duplicate()
+        #config = configurations.basic.duplicate()
     else:
         config = configurations.basic.duplicate()
     Manager.current_floor_name = config.name
@@ -170,7 +193,7 @@ func generate_map():
     open(startpoint)
     
     # grow maze
-    while openset.size() < w*h/4 and frontier.size() > 0:
+    while openset.size() < w*h*config.capacity and frontier.size() > 0:
         var i = randi()%frontier.size()
         var pick = frontier[i]
         var valid_dirs = []
@@ -192,13 +215,17 @@ func generate_map():
     print("size of open set after growing maze: ", openset.size())
     
     # fill in edges
-    for y in range(h+2):
-        y -= 1
+    for y in range(h+4):
+        y -= 2
         map[Vector2(-1, y)] = TILE.CLOSED
+        map[Vector2(-2, y)] = TILE.CLOSED
         map[Vector2(w , y)] = TILE.CLOSED
+        map[Vector2(w+1 , y)] = TILE.CLOSED
     for x in range(w):
         map[Vector2(x, -1)] = TILE.CLOSED
+        map[Vector2(x, -2)] = TILE.CLOSED
         map[Vector2(x,  h)] = TILE.CLOSED
+        map[Vector2(x,  h+1)] = TILE.CLOSED
     
     # scan for and close up short dead ends
     if true:
@@ -295,9 +322,9 @@ func generate_map():
                         repick = true
                         break
             if repick:
-                if allowed.size() == 0:
-                    continue
                 allowed.erase(pick)
+                if allowed.size() == 0:
+                    break
                 pick = allowed[randi()%allowed.size()]
         
         if allowed.size() == 0:
@@ -316,10 +343,10 @@ func generate_map():
                 openset[v] = null
     
     
-    for y in range(h+2):
-        y -= 1
-        for x in range(w+2):
-            x -= 1
+    for y in range(h+4):
+        y -= 2
+        for x in range(w+4):
+            x -= 2
             var tile = map[Vector2(x, y)]
             if tile is String:
                 tile = tiles.tile_set.find_tile_by_name(tile)
@@ -401,8 +428,8 @@ func init_fog():
 
 func tile_is_solid(map : TileMap, v : Vector2) -> bool:
     var rect : Rect2 = map.get_used_rect()
-    if !rect.has_point(v):
-        return false
+    #if !rect.has_point(v.round()):
+    #    return false
     var tile = map.get_cellv(v.round())
     var tname : String = map.tile_set.tile_get_name(tile)
     return "SOLID" in tname
@@ -492,6 +519,8 @@ func update_fog():
                 #    clear = true
                 # do edges
                 if clear:
+                    if !$TileMap.get_used_rect().has_point(v):
+                        continue
                     var map_tile = $TileMap.get_cellv(v)
                     var map_tile_name : String = $TileMap.tile_set.tile_get_name(map_tile)
                     if !map_tile_name.ends_with("SOLID"):

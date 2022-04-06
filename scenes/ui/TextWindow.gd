@@ -122,7 +122,7 @@ func _process(delta):
     
     if get_focus_owner() != last_target:
         process_time = 0.0
-        if get_focus_owner() != null and get_focus_owner().is_visible_in_tree():
+        if get_focus_owner() != null and get_focus_owner().is_visible_in_tree() and is_a_parent_of(get_focus_owner()):
             emit_signal("focused", self, get_focus_owner())
         last_target = get_focus_owner()
     
